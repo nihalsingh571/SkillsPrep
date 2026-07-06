@@ -18,5 +18,11 @@ Welcome to the SkillsPrep repository! This repository contains comprehensive mas
 ### Shell Scripting Basics
 ![Shell Scripting Revision Sheet](./Shell_Scripting.png)
 
+### JavaScript (JS)
+![JavaScript Revision Sheet](./JS.png)
+
+### React.js
+![React.js Revision Sheet](./ReactJs.png)
+
 ---
 *Check out the directories in this repository for in-depth masterclass handbooks on React.js, Java OOP, and more!*
