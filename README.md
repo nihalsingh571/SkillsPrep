@@ -1,5 +1,7 @@
 # Skills & Revision Sheets
 
+> This repository is my personal knowledge base—built to learn faster, revise smarter, and grow continuously.
+
 Welcome to the SkillsPrep repository! This repository contains comprehensive masterclass notes and quick revision sheets for various technologies.
 
 ## Revision Sheets
