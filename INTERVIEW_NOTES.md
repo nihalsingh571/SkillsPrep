@@ -3,14 +3,16 @@
 ## Section 0: PROJECT PITCH
 
 ### 30-Second Pitch (Recruiter Screen)
-"I built a self-healing GitOps platform on Minikube to demonstrate modern cloud-native resilience. It’s a 3-tier application (NGINX, FastAPI, Postgres) managed entirely through a custom Helm chart and deployed automatically via ArgoCD. I implemented comprehensive observability with the kube-prometheus-stack and introduced Chaos Mesh to run automated chaos experiments, like killing pods, to measure and optimize Mean Time To Recovery (MTTR). It showcases my hands-on skills with Kubernetes, Helm, GitOps, and chaos engineering principles."
+"I built a self-healing GitOps platform on Minikube that combines Kubernetes resilience engineering with a GenAI-powered CI debugger. It's a 3-tier application managed through a custom Helm chart and deployed automatically via ArgoCD. I implemented Chaos Mesh to inject failures and measure MTTR, full observability with Prometheus and Grafana, and — most recently — a Phase 7 GitHub Actions workflow that intercepts CI failures, redacts secrets from logs using regex, queries an LLM (Groq/LLaMA-3) for a root-cause diagnosis, and posts the fix directly as a PR comment. Zero API cost on green builds. It showcases Kubernetes, GitOps, chaos engineering, prompt engineering, and secure LLM integration."
 
 ### 2-Minute Pitch (Phone Interview)
-"For my capstone project, I wanted to move beyond just deploying apps and focus on resilience and automated operations. I engineered a complete local GitOps environment using Minikube. The core is a 3-tier Python/React/Postgres stack, but the real value is in the infrastructure. I wrote a custom Helm chart from scratch—12 templates with a single `values.yaml` as the source of truth. 
+"For my capstone project, I wanted to move beyond just deploying apps and focus on resilience and automated operations. I engineered a complete local GitOps environment using Minikube. The core is a 3-tier Python/React/Postgres stack, but the real value is in the infrastructure. I wrote a custom Helm chart from scratch — 12 templates with a single `values.yaml` as the source of truth.
 
 I integrated ArgoCD to enforce the desired state directly from GitHub, configuring it for automated sync, self-healing, and pruning. This means any manual kubectl changes are automatically reverted by ArgoCD, enforcing true GitOps.
 
-To prove the system is actually resilient, I implemented Chaos Mesh and wrote experiments like `pod-kill`. I monitor these experiments using a Prometheus and Grafana stack. For instance, when I inject a pod-kill failure, I can measure my MTTR down to the second—currently around 30 to 60 seconds. Through tuning Kubernetes primitives like Horizontal Pod Autoscalers, Pod Disruption Budgets, and fine-tuning readiness and liveness probes, I ensured zero-downtime rolling updates and highly resilient workloads. This project mimics real-world SRE and platform engineering workflows on a local cluster."
+To prove the system is actually resilient, I implemented Chaos Mesh with experiments like `pod-kill`, monitored through Prometheus and Grafana. My measured MTTR is around 30 to 60 seconds.
+
+The most recent addition is a Phase 7 GenAI CI Debugger. I built a GitHub Actions workflow that activates only on CI failure using `if: failure()`. When triggered, a Python script captures the test logs, runs regex-based secret redaction to strip AWS keys and Bearer tokens before anything touches a 3rd-party API, then queries Groq's LLaMA-3 model with a constrained system prompt that forces the LLM to reply with exactly: Likely Root Cause, Implicated File, and Suggested Fix. The response is posted automatically as a PR comment using the built-in `GITHUB_TOKEN`. Critically, the AI has no write access — it only suggests. A human must apply the fix. This is a deliberate design boundary for safe automation."
 
 ### 5-Minute Demo Walkthrough Order
 1. **The GitOps Workflow (ArgoCD):** Open ArgoCD UI. Show the application status as 'Synced' and 'Healthy'. Demonstrate self-healing by deleting a Deployment manually via `kubectl delete deploy backend` and watching ArgoCD recreate it instantly.
@@ -18,9 +20,10 @@ To prove the system is actually resilient, I implemented Chaos Mesh and wrote ex
 3. **Observability (Grafana):** Open the Grafana dashboard. Show the CPU utilization, memory, and pod status panels. Explain how Prometheus scrapes the metrics via annotations.
 4. **Chaos Injection (Chaos Mesh):** Open the Chaos Mesh dashboard or apply the `pod-kill.yaml` manifest. Watch the pods terminate.
 5. **Resilience & MTTR Validation:** Switch back to Grafana and `kubectl get pods -w`. Show how the ReplicaSet spawns a new pod, how the Readiness probe gates traffic until the app is ready, and how the MTTR is tracked on the dashboard.
+6. **Phase 7 — GenAI CI Debugger:** Open the `.github/workflows/ci.yaml` file. Show the `if: failure()` condition and explain zero-cost on green builds. Open `analyze_logs.py` and show the regex redaction block. Then open a GitHub PR that has a failing test and show the AI-generated comment with Root Cause, Implicated File, and Suggested Fix posted automatically.
 
 ### One-liner for Resume/LinkedIn
-"Architected a self-healing GitOps platform on Minikube using ArgoCD, Helm, and Chaos Mesh to automate deployments and validate system resilience through chaos engineering, achieving a 30s MTTR."
+"Architected a self-healing GitOps platform on Minikube (ArgoCD, Helm, Chaos Mesh, 30s MTTR) and built a Phase 7 GenAI CI Debugger — a GitHub Actions workflow that intercepts pipeline failures, redacts secrets from logs via regex, and auto-posts LLM-generated root-cause diagnoses to PRs using Groq/LLaMA-3."
 
 ---
 
@@ -40,7 +43,9 @@ To prove the system is actually resilient, I implemented Chaos Mesh and wrote ex
 | **Git Workflow** | Hands-on | Git as the source of truth for all declarative state. | Advanced branching strategies (GitFlow), pre-commit hooks. |
 | **Logging/Tracing** | Not done | Basic `kubectl logs`. | Fluentd/Promtail log shipping, OpenTelemetry instrumentation. |
 | **Security/RBAC** | Surface | Basic secret handling (even if flawed), non-root containers concept. | Sealed Secrets/External Secrets, Network Policies, OPA Gatekeeper. |
-| **CI/CD Pipeline** | Not done | CD is handled by ArgoCD. | GitHub Actions CI (build, test, lint, push image). |
+| **CI/CD Pipeline** | Hands-on | Phase 7: GitHub Actions CI with pytest, `if: failure()` AI step, zero-cost on green builds. | Image build + push to GHCR on merge, lint, SAST scanning. |
+| **GenAI / LLM Integration** | Hands-on | Groq API (LLaMA-3.1-8b-instant), constrained prompt engineering, structured Markdown output. | RAG over runbooks, fine-tuning on incident data, OpenAI fallback. |
+| **Security (Log Redaction)** | Hands-on | Regex-based secret stripping (AWS keys, Bearer tokens, DB passwords) before LLM API call. | Formal DLP pipeline, PII detection, audit logging of all LLM calls. |
 
 ---
 
@@ -405,5 +410,104 @@ Memorize these values. If asked "How is your HPA configured?", recite these exac
 | MTTR | `~30-60s` | Baseline achieved via probe tuning and replica configs. | Aim for < 10s with optimized probes, caching, and fast images. |
 | Chaos Mesh mode | `one` | Kills a single pod per schedule. | Used in game days, occasionally randomized in prod (Chaos Monkey). |
 
+| Phase 7 CI Trigger | `if: failure()` | AI step skipped entirely on green builds — zero API cost, zero latency overhead. | Same pattern for any expensive post-step (notifications, scans). |
+| LLM Model | `llama-3.1-8b-instant` via Groq | Free tier, fast inference (~1s), sufficient for log analysis. | GPT-4o or Claude Sonnet for more nuanced root-cause analysis. |
+| Log Redaction | Regex (Python `re` module) | Strips AWS keys, Bearer tokens, DB passwords before any 3rd-party API call. | Dedicated DLP library (e.g., Google DLP API, Presidio). |
+| LLM Output Format | Constrained Markdown prompt | Forces structured reply: Root Cause / Implicated File / Suggested Fix — prevents hallucinated essays. | JSON schema enforcement with `response_format` for OpenAI models. |
+| PR Comment Auth | `GITHUB_TOKEN` (built-in) | No additional secrets needed — uses the workflow's own token for write access to PR. | Fine-grained PAT with minimum required scopes for production. |
+| AI Write Access | None (read-only suggestion) | AI posts a comment only. A human must read, agree, and apply the fix. | Agentic mode with human-in-the-loop approval gate before auto-commit. |
+
 ---
-*Document prepared for Chaos-Engineered Self-Healing GitOps Platform interview study.*
+
+## Section 2.7 — Phase 7: GenAI CI Debugger
+
+### The Problem
+In standard CI/CD, when a build or test fails, a developer must stop, open the CI runner logs, scroll through thousands of lines, find the stack trace, and diagnose the cause manually. This increases MTTR and interrupts flow.
+
+### The Architecture (What We Built)
+
+```
+GitHub Push / PR
+      |
+      ▼
+[GitHub Actions — ci.yaml]
+  ├── Step 1: Run pytest (unit tests)
+  └── Step 2: if: failure() ──► analyze_logs.py
+                                       |
+                               [1] Capture raw stdout/stderr
+                               [2] Regex redaction (strip secrets)
+                               [3] POST sanitized log → Groq API
+                               [4] Receive structured Markdown diagnosis
+                               [5] POST diagnosis → GitHub PR comment
+                                   via GITHUB_TOKEN
+```
+
+### Component Deep Dive
+
+#### 1. The `if: failure()` Trigger
+- **What it does:** The AI analysis step runs **only** when a previous step in the workflow has failed.
+- **Why it matters:** On green builds (all tests pass), the `if: failure()` condition evaluates to false and the step is entirely skipped. This means:
+  - Zero Groq API tokens consumed on passing runs.
+  - Zero latency added to the normal CI pipeline.
+  - Cost scales only with failure rate, not with commit rate.
+- **Interviewer trap:** "Doesn't this add latency to your CI?" — No. On green builds, it costs nothing. On failing builds, the developer was already blocked; 5 extra seconds for an AI diagnosis is a net win.
+
+#### 2. Log Capture & Regex Redaction (`analyze_logs.py`)
+- **Why redaction is non-negotiable:** Enterprise CI logs routinely contain AWS access keys, Bearer tokens, database connection strings, and API keys in environment variable dumps or error tracebacks. Sending these raw to a 3rd-party LLM API (Groq, OpenAI) is a critical security violation.
+- **What we redact:**
+  ```python
+  import re
+  patterns = [
+      (r'AKIA[0-9A-Z]{16}', '<REDACTED_AWS_KEY>'),          # AWS Access Key
+      (r'Bearer [A-Za-z0-9\-._~+/]+=*', '<REDACTED_TOKEN>'), # Bearer tokens
+      (r'password=[^&\s]+', '<REDACTED_PASSWORD>'),           # DB passwords
+      (r'sk-[A-Za-z0-9]{32,}', '<REDACTED_API_KEY>'),        # OpenAI-style keys
+  ]
+  for pattern, replacement in patterns:
+      log_text = re.sub(pattern, replacement, log_text)
+  ```
+- **Interviewer question:** "What if a secret doesn't match your regex patterns?" — Good catch. This is a known limitation. The fix is to use a formal DLP (Data Loss Prevention) library like Microsoft Presidio or Google Cloud DLP, which uses NLP and context to detect secrets without relying on exact patterns.
+
+#### 3. Prompt Engineering (Groq / LLaMA-3)
+- **Model:** `llama-3.1-8b-instant` via Groq API (free tier, ~1s inference).
+- **Why constrained output matters:** An unconstrained LLM given a stack trace will write a 500-word essay explaining Python exception handling theory. This is useless in a PR comment. We constrain the output with a strict system prompt:
+  ```
+  System: You are a Senior DevOps Engineer reviewing a CI failure log.
+  Respond ONLY in this exact Markdown format:
+  ## Likely Root Cause
+  [one sentence]
+  ## Implicated File
+  [filename:line_number]
+  ## Suggested Fix
+  [concrete code or config change]
+  Do not include any other text.
+  ```
+- **Why this is prompt engineering, not just "calling an API":** We are exercising control over the LLM's output schema, length, tone, and scope. This is the difference between a working AI integration and an unusable one.
+
+#### 4. The PR Comment (GITHUB_TOKEN)
+- The workflow uses the **built-in `GITHUB_TOKEN`** — no additional secrets configuration required.
+- GitHub Actions automatically injects this token with scoped permissions (read for the repo, write for PR comments).
+- The Python script makes a POST to `https://api.github.com/repos/{owner}/{repo}/issues/{pr_number}/comments` with the formatted Markdown body.
+- **The design boundary:** The AI has `pull-requests: write` permission only. It cannot push commits, merge PRs, modify workflow files, or access secrets. This is intentional. A human reads the PR comment, decides if the diagnosis is correct, and applies the fix manually.
+
+### Why This Design Boundary Matters (Critical Interview Answer)
+> *"Why didn't you give the AI permission to fix the code automatically?"*
+
+Automatic code modification by an LLM is dangerous for several reasons:
+1. **LLMs hallucinate.** The suggested fix might introduce a new bug or a security vulnerability.
+2. **No audit trail.** An AI commit bypasses code review. Senior engineers cannot catch regressions.
+3. **Blast radius.** An AI with commit access that goes wrong can break the main branch for the entire team.
+4. **Trust model.** "Suggestion-only" AI is safe to deploy now. "Autonomous-fix" AI requires formal approval workflows, rollback mechanisms, and extensive testing — none of which were in scope.
+
+The correct escalation path: Start with AI-as-advisor (what we built), then gate on human approval, then allow auto-apply only to trivially safe fixes (e.g., formatting).
+
+### Weak Spots to Know
+| Gap | What an Interviewer Will Ask | What to Say |
+|---|---|---|
+| Regex redaction is pattern-based | "What secrets won't your regex catch?" | Custom internal token formats, new secret types. Fix: use Presidio/DLP. |
+| LLM can still hallucinate | "What if the AI diagnosis is wrong?" | It's suggestion-only. Human review gates the fix. We log all AI responses for audit. |
+| Groq free tier has rate limits | "What if Groq is down during a critical incident?" | Add try/except with fallback to a local model (Ollama) or OpenAI. |
+| No feedback loop | "How do you know if the AI's suggestions are actually correct?" | Add a thumbs-up/down reaction tracker on PR comments to measure diagnosis accuracy over time. |
+
+---
+*Document prepared for Chaos-Engineered Self-Healing GitOps Platform interview study. Includes Phase 7: GenAI CI Debugger.*
