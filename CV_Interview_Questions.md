@@ -1474,3 +1474,48 @@ Because the pipeline failed, the deployment was blocked, which was the correct b
 🔄 *Follow-up:* Why is `alpine` sometimes problematic for Python Docker images compared to Node.js?
 
 ---
+
+---
+
+## 🎤 Professional Self-Introduction (Memorize This)
+
+> Use this as your **"Tell me about yourself"** answer. It's confident, specific, and immediately differentiates you from generic full-stack candidates.
+
+---
+
+*"Hi, I'm Nihal Kumar Singh, a 2026 Computer Science graduate and full-stack developer working primarily with React, Node.js, and TypeScript.*
+
+*What sets my background apart is that I don't just build applications — I deploy and operate them the way a production team would. For example, I built an Internship Recommendation platform with a machine learning matching engine, but instead of stopping at deployment, I provisioned a full AWS EKS cluster for it — with IAM/OIDC pod-level security, an ALB ingress, and horizontal pod autoscaling triggered at 70–80% CPU and memory. I run PostgreSQL and Redis as Kubernetes StatefulSets, and I've got Prometheus scraping metrics every 15 seconds with Grafana dashboards giving me real-time visibility into pod health and request rates.*
+
+*I also built a 68-test CI/CD pipeline with GitHub Actions that takes the project from commit to live deployment in under 4 minutes.*
+
+*On the pure full-stack side, I built PropSync, a real-time property management platform with four role-based dashboards — Admin, Owner, Tenant, and Maintenance Staff — secured behind a single RBAC codebase with three-layer authentication. It syncs bookings, maintenance requests, and dashboard metrics live via Socket.IO, so nobody's ever staring at a stale screen waiting to refresh.*
+
+*So while I'm comfortable owning the full stack — from schema design to UI — what I actually enjoy most is the infrastructure layer: taking something that works on my laptop and making it resilient, observable, and production-grade on real cloud infrastructure. That's the direction I want to keep growing in."*
+
+---
+
+### 💡 Why This Introduction Works
+
+| What you said | What the interviewer hears |
+|---|---|
+| "I don't just build — I deploy and operate" | You think in production, not just in code |
+| "IAM/OIDC pod-level security" | You know Kubernetes security beyond basic deployments |
+| "HPA at 70–80% CPU/memory" | You've actually tuned autoscaling, not just enabled it |
+| "PostgreSQL + Redis as StatefulSets" | You understand stateful workloads in Kubernetes |
+| "Prometheus every 15 seconds + Grafana" | You've built real observability, not just logging |
+| "68 tests, under 4 minutes" | You care about quality AND speed |
+| "Socket.IO — nobody staring at a stale screen" | You explain features with user impact, not just tech |
+| "That's the direction I want to grow in" | Clear career intent — easier to place in infra/platform roles |
+
+### ⚠️ After Saying This — Be Ready For
+
+- **"Walk me through the EKS cluster setup."** → Q62 in this document
+- **"What does IAM/OIDC pod-level security actually mean?"** → Q63
+- **"How does HPA decide when to scale?"** → Q64
+- **"What's in your Grafana dashboard?"** → Q68
+- **"68 tests — what kind? How are they structured?"** → Q73
+- **"Tell me about PropSync's authentication."** → Q23
+
+---
+
